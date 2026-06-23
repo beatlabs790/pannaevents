@@ -10,8 +10,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     
+    // Safety check in case the page is already loaded (eliminates race conditions)
+    if (document.readyState === 'complete') {
+        fadeOutLoader();
+    } else {
+        window.addEventListener('load', fadeOutLoader);
+    }
+    
     // Safety timeout in case window load takes too long
-    window.addEventListener('load', fadeOutLoader);
     setTimeout(fadeOutLoader, 2500);
 
     // --- Theme Management ---
