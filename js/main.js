@@ -240,4 +240,172 @@ document.addEventListener('DOMContentLoaded', () => {
         resizeCanvas();
         animate();
     }
+
+    // --- Panna AI Chatbot Injection & Logic ---
+    const injectChatbot = () => {
+        const widget = document.createElement('div');
+        widget.id = 'panna-ai-widget';
+        widget.innerHTML = `
+            <button id="panna-ai-toggle" aria-label="Open Panna AI Chat">
+                <span class="ai-icon">✦</span>
+                <span class="ai-label">Panna AI</span>
+            </button>
+            <div id="panna-ai-box">
+                <div id="panna-ai-header">
+                    <div class="ai-avatar">✦</div>
+                    <div class="ai-title-info">
+                        <h4>Panna AI</h4>
+                        <span>Active Now</span>
+                    </div>
+                    <button id="panna-ai-close" aria-label="Close Chat">&times;</button>
+                </div>
+                <div id="panna-ai-messages">
+                    <div class="ai-msg bot">
+                        <p>Hello! I am Panna AI, your event planning assistant. How can I help you today? Ask me about our decoration packages, catering menu options, or office location!</p>
+                    </div>
+                </div>
+                <div id="panna-ai-input-area">
+                    <input type="text" id="panna-ai-input" placeholder="Type a message..." autocomplete="off">
+                    <button id="panna-ai-send">Send</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(widget);
+
+        // Core Selectors
+        const toggleBtn = document.getElementById('panna-ai-toggle');
+        const closeBtn = document.getElementById('panna-ai-close');
+        const inputField = document.getElementById('panna-ai-input');
+        const sendBtn = document.getElementById('panna-ai-send');
+        const messagesDiv = document.getElementById('panna-ai-messages');
+
+        // Toggle Chatbox
+        toggleBtn.addEventListener('click', () => {
+            widget.classList.toggle('active');
+            if (widget.classList.contains('active')) {
+                inputField.focus();
+            }
+        });
+
+        closeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            widget.classList.remove('active');
+        });
+
+        // Initialize Chrome window.ai (Gemini Nano) if available
+        let aiSession = null;
+        const initAiSession = async () => {
+            if (window.ai && window.ai.createTextSession) {
+                try {
+                    const systemPrompt = "You are Panna AI, a friendly assistant for Panna Event decors & Caterers in Patna. " +
+                                         "Address: Maurya Path, near Shyamal Hospital, Jyotipuram Colony, Magistrate Colony, Khajpura, Patna, Bihar 800025. " +
+                                         "Phones: 9835445915, 7979741127. " +
+                                         "Pricing: Catering depends on menu items & wedding event depends on design & theme. " +
+                                         "We offer: Venue Booking, Decoration, Catering, Makeup/Mehendi, Photography, DJ, Corporate Conferences. " +
+                                         "Keep answers brief, warm, helpful, and human-like.";
+                    aiSession = await window.ai.createTextSession({ systemPrompt: systemPrompt });
+                } catch (e) {
+                    console.warn("Failed to initialize Chrome window.ai session:", e);
+                }
+            }
+        };
+        initAiSession();
+
+        // Chat Brain
+        const handleSendMessage = async () => {
+            const userText = inputField.value.trim();
+            if (!userText) return;
+
+            // Append User Message
+            appendMessage(userText, 'user');
+            inputField.value = '';
+
+            // Show Typing Indicator
+            const indicator = showTypingIndicator();
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            // Handle reply
+            setTimeout(async () => {
+                let botReply = "";
+                if (aiSession) {
+                    try {
+                        botReply = await aiSession.prompt(userText);
+                    } catch (e) {
+                        console.error("Chrome window.ai error, falling back to local matcher:", e);
+                        botReply = generateBotReply(userText);
+                    }
+                } else {
+                    botReply = generateBotReply(userText);
+                }
+                
+                removeTypingIndicator(indicator);
+                appendMessage(botReply, 'bot');
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }, 800 + Math.random() * 500);
+        };
+
+        sendBtn.addEventListener('click', handleSendMessage);
+        inputField.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                handleSendMessage();
+            }
+        });
+
+        const appendMessage = (text, sender) => {
+            const msgEl = document.createElement('div');
+            msgEl.className = `ai-msg ${sender}`;
+            msgEl.innerHTML = `<p>${text}</p>`;
+            messagesDiv.appendChild(msgEl);
+        };
+
+        const showTypingIndicator = () => {
+            const indEl = document.createElement('div');
+            indEl.className = 'typing-indicator';
+            indEl.innerHTML = '<span></span><span></span><span></span>';
+            messagesDiv.appendChild(indEl);
+            return indEl;
+        };
+
+        const removeTypingIndicator = (element) => {
+            if (element && element.parentNode) {
+                element.parentNode.removeChild(element);
+            }
+        };
+
+        const generateBotReply = (text) => {
+            const input = text.toLowerCase();
+            
+            if (input.includes('location') || input.includes('address') || input.includes('office') || input.includes('where')) {
+                return "We are located at: <strong>Maurya Path, near Shyamal Hospital, Jyotipuram Colony, Magistrate Colony, Khajpura, Patna, Bihar 800025</strong>. We would love to host you for a cup of tea and a layout planning session!";
+            }
+            if (input.includes('service') || input.includes('decor') || input.includes('event') || input.includes('cater') || input.includes('what do you do') || input.includes('cater')) {
+                return "Panna Events offers premium event planning: 1. Venue Booking, 2. Bespoke Decoration (Stages, Haldi, etc.), 3. Gourmet Catering (Veg/Non-Veg), 4. Bridal Makeup/Mehendi, 5. Photography, 6. Artist/DJ, 7. Corporate Seminars. Explore full details on our Services page!";
+            }
+            if (input.includes('price') || input.includes('cost') || input.includes('rate') || input.includes('charge') || input.includes('package') || input.includes('fee')) {
+                return "For Panna Events, our catering prices vary depending on the specific menu items you choose, and our decoration rates depend entirely on your chosen theme and design layouts. Please contact us directly for a free custom quote!";
+            }
+            if (input.includes('book') || input.includes('contact') || input.includes('phone') || input.includes('number') || input.includes('call') || input.includes('hire')) {
+                return "You can book by visiting our Contact page and filling out the details—it redirects you directly to WhatsApp with your details prefilled! Or call Saurav directly at <strong>9835445915</strong> or <strong>7979741127</strong>.";
+            }
+            if (input.includes('hello') || input.includes('hi') || input.includes('hey') || input.includes('greet')) {
+                return "Hello! I'm Panna AI, your friendly helper. How are you doing? What event details can I help you search for today?";
+            }
+            if (input.includes('thanks') || input.includes('thank you') || input.includes('great') || input.includes('awesome')) {
+                return "You're very welcome! I'm here to help. Let me know if you have any other questions about planning your special day.";
+            }
+            if (input.includes('zephyr')) {
+                return "Ah, ZephyrDevs! They are the talented design team who engineered this beautiful, mobile-first website for us. You can check them out on our Developers page!";
+            }
+            if (input.includes('food') || input.includes('menu') || input.includes('veg') || input.includes('non-veg')) {
+                return "We serve premium Vegetarian (Veg) and Non-Vegetarian (Non-Veg) catering packages. The pricing depends on chosen menu items. We feature live counters, Indian, and Chinese specialties.";
+            }
+            if (input.includes('haldi') || input.includes('mehendi') || input.includes('house') || input.includes('pravesh') || input.includes('wedding')) {
+                return "Yes, we specialize in theme decors! From royal wedding stage backdrops and yellow marigold Haldi/Mehendi seating to traditional Griha Pravesham (housewarming) door entrances. View our work on the Gallery page!";
+            }
+
+            return "That sounds interesting! Since I'm still learning, could you please contact Saurav directly at <strong>9835445915</strong> or send us a WhatsApp message via our Contact page? They will answer any specific design queries you have!";
+        };
+    };
+
+    injectChatbot();
 });

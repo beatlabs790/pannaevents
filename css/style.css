@@ -1332,3 +1332,215 @@ textarea.form-control {
     fill: none;
     flex-shrink: 0;
 }
+
+/* --- Panna AI Chatbot --- */
+#panna-ai-widget {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    z-index: 1900;
+    font-family: var(--font-sans);
+}
+
+#panna-ai-toggle {
+    background-color: var(--accent);
+    color: var(--bg-primary);
+    border: 1px solid var(--accent);
+    padding: 0.75rem 1.5rem;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 5px 25px var(--accent-glow);
+    transition: var(--transition-fast);
+}
+
+#panna-ai-toggle:hover {
+    background-color: var(--accent-hover);
+    transform: translateY(-3px);
+}
+
+#panna-ai-toggle .ai-icon {
+    font-size: 1.1rem;
+    animation: spinSlow 4s infinite linear;
+}
+
+@keyframes spinSlow {
+    to { transform: rotate(360deg); }
+}
+
+#panna-ai-box {
+    position: absolute;
+    bottom: 60px;
+    right: 0;
+    width: 320px;
+    height: 420px;
+    background-color: var(--bg-glass);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: var(--shadow-hover);
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+    transform-origin: bottom right;
+    pointer-events: none;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+#panna-ai-widget.active #panna-ai-box {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    pointer-events: auto;
+}
+
+#panna-ai-header {
+    background-color: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+#panna-ai-header .ai-avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background-color: var(--accent);
+    color: var(--bg-primary);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.1rem;
+}
+
+#panna-ai-header .ai-title-info {
+    flex-grow: 1;
+}
+
+#panna-ai-header .ai-title-info h4 {
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+#panna-ai-header .ai-title-info span {
+    font-size: 0.7rem;
+    color: #4cd964;
+    font-weight: 500;
+}
+
+#panna-ai-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+}
+
+#panna-ai-close:hover {
+    color: var(--accent);
+}
+
+#panna-ai-messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.ai-msg {
+    max-width: 80%;
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.ai-msg.bot {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    align-self: flex-start;
+    border-top-left-radius: 0;
+    border: 1px solid var(--border);
+}
+
+.ai-msg.user {
+    background-color: var(--accent);
+    color: var(--bg-primary);
+    align-self: flex-end;
+    border-top-right-radius: 0;
+}
+
+#panna-ai-input-area {
+    border-top: 1px solid var(--border);
+    padding: 0.75rem;
+    display: flex;
+    gap: 0.5rem;
+    background-color: var(--bg-secondary);
+}
+
+#panna-ai-input {
+    flex-grow: 1;
+    border: 1px solid var(--border);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    padding: 0.5rem 0.75rem;
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+}
+
+#panna-ai-input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+#panna-ai-send {
+    background-color: var(--accent);
+    color: var(--bg-primary);
+    border: 1px solid var(--accent);
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+#panna-ai-send:hover {
+    background-color: var(--accent-hover);
+}
+
+.typing-indicator {
+    display: inline-flex;
+    gap: 3px;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border);
+    align-self: flex-start;
+    max-width: 80%;
+}
+
+.typing-indicator span {
+    width: 6px;
+    height: 6px;
+    background-color: var(--text-muted);
+    border-radius: 50%;
+    animation: typingBounce 1s infinite alternate;
+}
+
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingBounce {
+    from { transform: translateY(0); }
+    to { transform: translateY(-5px); }
+}
